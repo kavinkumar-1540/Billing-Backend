@@ -1,4 +1,4 @@
-import { Injectable, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, OnModuleDestroy, ServiceUnavailableException } from '@nestjs/common';
 import puppeteer, { Browser } from 'puppeteer';
 
 @Injectable()
@@ -7,10 +7,18 @@ export class PdfRenderService implements OnModuleDestroy {
 
   private getBrowser(): Promise<Browser> {
     if (!this.browserPromise) {
-      this.browserPromise = puppeteer.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      });
+      this.browserPromise = puppeteer
+        .launch({
+          headless: true,
+          args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        })
+        .catch((err: unknown) => {
+          this.browserPromise = undefined;
+          throw new ServiceUnavailableException(
+            'PDF generation is unavailable on this deployment (no Chromium runtime installed)',
+            { cause: err instanceof Error ? err : undefined },
+          );
+        });
     }
     return this.browserPromise;
   }
