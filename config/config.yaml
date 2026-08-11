@@ -1,0 +1,18 @@
+# Committed defaults for local development. Never put real secrets or
+# production credentials here — override them in config.local.yaml
+# (gitignored) or config.<NODE_ENV>.yaml on the deployment target.
+app:
+  port: 5003
+  nodeEnv: development
+  frontendUrl: http://localhost:5173
+
+mongodb:
+  # 127.0.0.1, not localhost: on machines where localhost resolves to ::1
+  # first, the driver's IPv6 attempt fails if MongoDB only binds to IPv4.
+  uri: mongodb://127.0.0.1:27017/billing-suite
+
+jwt:
+  accessSecret: dev-access-secret-change-me
+  refreshSecret: dev-refresh-secret-change-me
+  accessExpiresInSeconds: 900 # 15 minutes
+  refreshExpiresInSeconds: 604800 # 7 days

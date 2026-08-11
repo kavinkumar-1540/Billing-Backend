@@ -1,0 +1,13 @@
+# Copy this file to config.local.yaml (gitignored) to override values from
+# config.yaml on your machine or deployment target — real secrets, a hosted
+# MongoDB Atlas URI, production JWT secrets, etc. Only keys you want to
+# override need to be present; anything omitted falls back to config.yaml.
+app:
+  frontendUrl: https://your-frontend-domain.example
+
+mongodb:
+  uri: mongodb+srv://<user>:<password>@<cluster>.mongodb.net/billing-suite?retryWrites=true&w=majority
+
+jwt:
+  accessSecret: replace-with-a-long-random-string
+  refreshSecret: replace-with-a-different-long-random-string

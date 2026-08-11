@@ -1,0 +1,67 @@
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ReportsService } from './reports.service';
+import { DateRangeQueryDto } from './dto/date-range-query.dto';
+import { CompanyScopeGuard } from '../auth/guards/company-scope.guard';
+import { PermissionsGuard } from '../auth/guards/permissions.guard';
+import { RequirePermissions } from '../auth/decorators/require-permissions.decorator';
+import { CurrentCompany } from '../auth/decorators/current-company.decorator';
+import { DateRange } from './reports.types';
+
+function toDateRange(query: DateRangeQueryDto): DateRange {
+  return {
+    from: query.from ? new Date(query.from) : undefined,
+    to: query.to ? new Date(query.to) : undefined,
+  };
+}
+
+@ApiTags('reports')
+@ApiBearerAuth()
+@UseGuards(CompanyScopeGuard, PermissionsGuard)
+@RequirePermissions('reports:view')
+@Controller('reports')
+export class ReportsController {
+  constructor(private readonly reportsService: ReportsService) {}
+
+  @Get('sales')
+  sales(
+    @CurrentCompany('companyId') companyId: string,
+    @Query() query: DateRangeQueryDto,
+  ) {
+    return this.reportsService.salesReport(companyId, toDateRange(query));
+  }
+
+  @Get('purchases')
+  purchases(
+    @CurrentCompany('companyId') companyId: string,
+    @Query() query: DateRangeQueryDto,
+  ) {
+    return this.reportsService.purchaseReport(companyId, toDateRange(query));
+  }
+
+  @Get('gst')
+  gst(
+    @CurrentCompany('companyId') companyId: string,
+    @Query() query: DateRangeQueryDto,
+  ) {
+    return this.reportsService.gstReport(companyId, toDateRange(query));
+  }
+
+  @Get('inventory')
+  inventory(@CurrentCompany('companyId') companyId: string) {
+    return this.reportsService.inventoryReport(companyId);
+  }
+
+  @Get('outstanding')
+  outstanding(@CurrentCompany('companyId') companyId: string) {
+    return this.reportsService.outstandingReport(companyId);
+  }
+
+  @Get('payments')
+  payments(
+    @CurrentCompany('companyId') companyId: string,
+    @Query() query: DateRangeQueryDto,
+  ) {
+    return this.reportsService.paymentReport(companyId, toDateRange(query));
+  }
+}
