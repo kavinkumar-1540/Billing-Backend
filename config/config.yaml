@@ -9,10 +9,10 @@ app:
 mongodb:
   # 127.0.0.1, not localhost: on machines where localhost resolves to ::1
   # first, the driver's IPv6 attempt fails if MongoDB only binds to IPv4.
-  uri: mongodb://127.0.0.1:27017/billing-suite
+  uri: mongodb+srv://Kavinkumar:Kavin7845400241@valikatticluster.c2o0hyp.mongodb.net/billing-suite
 
 jwt:
   accessSecret: dev-access-secret-change-me
   refreshSecret: dev-refresh-secret-change-me
-  accessExpiresInSeconds: 900 # 15 minutes
+  accessExpiresInSeconds: 9000 # 15 minutes
   refreshExpiresInSeconds: 604800 # 7 days
