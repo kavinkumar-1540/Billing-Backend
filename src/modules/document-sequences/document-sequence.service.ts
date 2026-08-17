@@ -16,6 +16,7 @@ const DEFAULT_PREFIXES: Record<DocumentType, string> = {
   [DocumentType.DEBIT_NOTE]: 'DN',
   [DocumentType.PAYMENT_RECEIPT]: 'REC',
   [DocumentType.PAYMENT_PAYMENT]: 'PAY',
+  [DocumentType.BILL_ADJUSTMENT]: 'BADJ',
 };
 
 /**

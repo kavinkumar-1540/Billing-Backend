@@ -1,4 +1,8 @@
-import { Injectable, OnModuleDestroy, ServiceUnavailableException } from '@nestjs/common';
+import {
+  Injectable,
+  OnModuleDestroy,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import puppeteer, { Browser } from 'puppeteer';
 
 @Injectable()

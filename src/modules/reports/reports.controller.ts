@@ -57,6 +57,16 @@ export class ReportsController {
     return this.reportsService.outstandingReport(companyId);
   }
 
+  @Get('creditors')
+  creditors(@CurrentCompany('companyId') companyId: string) {
+    return this.reportsService.creditorsReport(companyId);
+  }
+
+  @Get('debtors')
+  debtors(@CurrentCompany('companyId') companyId: string) {
+    return this.reportsService.debtorsReport(companyId);
+  }
+
   @Get('payments')
   payments(
     @CurrentCompany('companyId') companyId: string,

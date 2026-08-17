@@ -12,6 +12,7 @@ export enum DocumentType {
   DEBIT_NOTE = 'DEBIT_NOTE',
   PAYMENT_RECEIPT = 'PAYMENT_RECEIPT',
   PAYMENT_PAYMENT = 'PAYMENT_PAYMENT',
+  BILL_ADJUSTMENT = 'BILL_ADJUSTMENT',
 }
 
 @Schema({ timestamps: true, collection: 'document_sequences' })

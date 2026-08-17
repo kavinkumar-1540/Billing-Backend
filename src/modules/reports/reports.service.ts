@@ -10,13 +10,18 @@ import {
   PurchaseBillDocument,
 } from '../purchase-bills/schemas/purchase-bill.schema';
 import { Item, ItemDocument } from '../items/schemas/item.schema';
-import { Party, PartyDocument } from '../parties/schemas/party.schema';
+import {
+  Party,
+  PartyDocument,
+  PartyType,
+} from '../parties/schemas/party.schema';
 import { Payment, PaymentDocument } from '../payments/schemas/payment.schema';
 import {
   DateRange,
   GstReport,
   InventoryReportRow,
   OutstandingReportRow,
+  PartyLedgerBalanceRow,
   PaymentReportRow,
   PurchaseReportRow,
   SalesReportRow,
@@ -244,6 +249,48 @@ export class ReportsService {
       name: party.name,
       partyType: party.partyType,
       gstin: party.gstin,
+      currentOutstanding: party.currentOutstanding,
+    }));
+  }
+
+  /** Creditors: suppliers this company currently owes money to. */
+  async creditorsReport(companyId: string): Promise<PartyLedgerBalanceRow[]> {
+    const suppliers = await this.partyModel
+      .find({
+        companyId: new Types.ObjectId(companyId),
+        isActive: true,
+        partyType: { $in: [PartyType.SUPPLIER, PartyType.BOTH] },
+        currentOutstanding: { $gt: 0 },
+      })
+      .sort({ currentOutstanding: -1 })
+      .exec();
+
+    return suppliers.map((party) => ({
+      partyId: String(party._id),
+      name: party.name,
+      gstin: party.gstin,
+      phone: party.phone,
+      currentOutstanding: party.currentOutstanding,
+    }));
+  }
+
+  /** Debtors: customers who currently owe this company money. */
+  async debtorsReport(companyId: string): Promise<PartyLedgerBalanceRow[]> {
+    const customers = await this.partyModel
+      .find({
+        companyId: new Types.ObjectId(companyId),
+        isActive: true,
+        partyType: { $in: [PartyType.CUSTOMER, PartyType.BOTH] },
+        currentOutstanding: { $gt: 0 },
+      })
+      .sort({ currentOutstanding: -1 })
+      .exec();
+
+    return customers.map((party) => ({
+      partyId: String(party._id),
+      name: party.name,
+      gstin: party.gstin,
+      phone: party.phone,
       currentOutstanding: party.currentOutstanding,
     }));
   }

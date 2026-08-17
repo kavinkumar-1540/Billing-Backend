@@ -55,6 +55,14 @@ export interface OutstandingReportRow {
   currentOutstanding: number; // paise
 }
 
+export interface PartyLedgerBalanceRow {
+  partyId: string;
+  name: string;
+  gstin?: string;
+  phone?: string;
+  currentOutstanding: number; // paise
+}
+
 export interface PaymentReportRow {
   date: string;
   paymentType: 'RECEIPT' | 'PAYMENT';

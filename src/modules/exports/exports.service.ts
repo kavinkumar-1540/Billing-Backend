@@ -1,9 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { ReportsService } from '../reports/reports.service';
 import { AuditService } from '../audit/audit.service';
-import { DateRange, GstReportRow } from '../reports/reports.types';
+import {
+  DateRange,
+  GstReportRow,
+  PartyLedgerBalanceRow,
+} from '../reports/reports.types';
 import { buildWorkbook, type ExcelColumnDef } from './excel-builder.util';
 import { AuditLogDocument } from '../audit/schemas/audit-log.schema';
+
+const PARTY_LEDGER_COLUMNS: ExcelColumnDef<PartyLedgerBalanceRow>[] = [
+  { header: 'Party', key: 'name', value: (r) => r.name },
+  { header: 'GSTIN', key: 'gstin', value: (r) => r.gstin },
+  { header: 'Phone', key: 'phone', value: (r) => r.phone },
+  {
+    header: 'Outstanding',
+    key: 'currentOutstanding',
+    isMoney: true,
+    value: (r) => r.currentOutstanding,
+  },
+];
 
 @Injectable()
 export class ExportsService {
