@@ -14,6 +14,7 @@ import {
 import { User, UserDocument } from '../users/schemas/user.schema';
 import { Role, RoleDocument } from '../roles/schemas/role.schema';
 import { CreateCompanyUserDto } from './dto/create-company-user.dto';
+import { UpdateCompanyUserProfileDto } from './dto/update-company-user-profile.dto';
 import { CompanyUserListItem } from './company-members.types';
 
 const BCRYPT_ROUNDS = 10;
@@ -96,7 +97,7 @@ export class CompanyMembersService {
       companyId: new Types.ObjectId(companyId),
       userId: user._id,
       roleId: new Types.ObjectId(dto.roleId),
-      isActive: true,
+      isActive: dto.isActive ?? true,
     });
 
     const role = await this.roleModel.findById(dto.roleId).exec();
@@ -107,7 +108,7 @@ export class CompanyMembersService {
       email: user.email,
       roleId: dto.roleId,
       roleName: role!.name,
-      isActive: true,
+      isActive: member.isActive,
       lastLoginAt: user.lastLoginAt,
     };
   }
@@ -151,5 +152,49 @@ export class CompanyMembersService {
     }
     member.isActive = isActive;
     await member.save();
+  }
+
+  async updateProfile(
+    companyId: string,
+    companyMemberId: string,
+    dto: UpdateCompanyUserProfileDto,
+  ): Promise<void> {
+    const member = await this.loadMemberScoped(companyId, companyMemberId);
+
+    if (dto.email) {
+      const existing = await this.userModel
+        .findOne({
+          email: dto.email.toLowerCase(),
+          _id: { $ne: member.userId },
+        })
+        .exec();
+      if (existing) {
+        throw new BadRequestException('Another user already uses this email');
+      }
+    }
+
+    await this.userModel
+      .updateOne(
+        { _id: member.userId },
+        {
+          $set: {
+            ...(dto.name ? { name: dto.name } : {}),
+            ...(dto.email ? { email: dto.email.toLowerCase() } : {}),
+          },
+        },
+      )
+      .exec();
+  }
+
+  async remove(
+    companyId: string,
+    companyMemberId: string,
+    requestingUserId: string,
+  ): Promise<void> {
+    const member = await this.loadMemberScoped(companyId, companyMemberId);
+    if (String(member.userId) === requestingUserId) {
+      throw new ForbiddenException('You cannot remove your own membership');
+    }
+    await this.companyMemberModel.deleteOne({ _id: member._id }).exec();
   }
 }

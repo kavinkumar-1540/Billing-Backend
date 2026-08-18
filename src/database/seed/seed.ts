@@ -77,26 +77,45 @@ async function run() {
       isSystemDefault: true,
     })),
   );
-  const adminRole = roleDocs.find((r) => r.name === 'ADMIN')!;
+  const roleByName = new Map(roleDocs.map((r) => [r.name, r]));
   console.log(`Created ${roleDocs.length} roles`);
 
-  // --- Admin user ---
+  // --- Demo users (one per key role, so the login page's quick-login buttons work) ---
+  const DEMO_USERS = [
+    { email: 'admin@businesssuite.local', name: 'Admin User', role: 'ADMIN' },
+    {
+      email: 'kavin@demotraders.example',
+      name: 'Kavin Kumar',
+      role: 'MANAGER',
+    },
+    { email: 'inventory@stbilling.local', name: 'Priya Sharma', role: 'SALES' },
+    {
+      email: 'sundar.accounts@demotraders.example',
+      name: 'Sundar Raman',
+      role: 'VIEWER',
+    },
+  ] as const;
+
   const passwordHash = await bcrypt.hash('ChangeMe@123', 10);
-  const adminUser = await UserModel.create({
-    email: 'admin@businesssuite.local',
-    passwordHash,
-    name: 'Admin User',
-    isActive: true,
-  });
-  await CompanyMemberModel.create({
-    companyId: company._id,
-    userId: adminUser._id,
-    roleId: adminRole._id,
-    isActive: true,
-  });
-  console.log(
-    'Created admin user: admin@businesssuite.local / ChangeMe@123 (DEV ONLY)',
-  );
+  for (const demo of DEMO_USERS) {
+    const role = roleByName.get(demo.role);
+    if (!role) throw new Error(`Seed error: role ${demo.role} not found`);
+    const user = await UserModel.create({
+      email: demo.email,
+      passwordHash,
+      name: demo.name,
+      isActive: true,
+    });
+    await CompanyMemberModel.create({
+      companyId: company._id,
+      userId: user._id,
+      roleId: role._id,
+      isActive: true,
+    });
+    console.log(
+      `Created ${demo.role} user: ${demo.email} / ChangeMe@123 (DEV ONLY)`,
+    );
+  }
 
   console.log('\nSeed complete.');
   console.log(`Company: ${company.name} (${company.slug})`);

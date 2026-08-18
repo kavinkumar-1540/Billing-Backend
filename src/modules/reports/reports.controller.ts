@@ -1,4 +1,10 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ReportsService } from './reports.service';
 import { DateRangeQueryDto } from './dto/date-range-query.dto';
@@ -73,5 +79,32 @@ export class ReportsController {
     @Query() query: DateRangeQueryDto,
   ) {
     return this.reportsService.paymentReport(companyId, toDateRange(query));
+  }
+
+  @Get('monthly')
+  monthly(@CurrentCompany('companyId') companyId: string) {
+    return this.reportsService.monthlyReport(companyId);
+  }
+
+  @Get('gst-register')
+  gstRegister(
+    @CurrentCompany('companyId') companyId: string,
+    @Query() query: DateRangeQueryDto,
+  ) {
+    return this.reportsService.gstRegisterReport(companyId, toDateRange(query));
+  }
+
+  @Get('stock-movement')
+  stockMovement(@CurrentCompany('companyId') companyId: string) {
+    return this.reportsService.stockMovementReport(companyId);
+  }
+
+  @Get('ledger')
+  ledger(
+    @CurrentCompany('companyId') companyId: string,
+    @Query('partyId') partyId?: string,
+  ) {
+    if (!partyId) throw new BadRequestException('partyId is required');
+    return this.reportsService.ledgerReport(companyId, partyId);
   }
 }

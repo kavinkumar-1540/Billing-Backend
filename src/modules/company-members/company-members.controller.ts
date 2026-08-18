@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -12,6 +13,7 @@ import { CompanyMembersService } from './company-members.service';
 import { CreateCompanyUserDto } from './dto/create-company-user.dto';
 import { UpdateCompanyUserRoleDto } from './dto/update-company-user-role.dto';
 import { UpdateCompanyUserStatusDto } from './dto/update-company-user-status.dto';
+import { UpdateCompanyUserProfileDto } from './dto/update-company-user-profile.dto';
 import { CompanyScopeGuard } from '../auth/guards/company-scope.guard';
 import { PermissionsGuard } from '../auth/guards/permissions.guard';
 import { RequirePermissions } from '../auth/decorators/require-permissions.decorator';
@@ -63,5 +65,25 @@ export class CompanyMembersController {
       dto.isActive,
       requestingUserId,
     );
+  }
+
+  @RequirePermissions('users:manage')
+  @Patch(':id/profile')
+  updateProfile(
+    @CurrentCompany('companyId') companyId: string,
+    @Param('id') id: string,
+    @Body() dto: UpdateCompanyUserProfileDto,
+  ) {
+    return this.companyMembersService.updateProfile(companyId, id, dto);
+  }
+
+  @RequirePermissions('users:manage')
+  @Delete(':id')
+  remove(
+    @CurrentCompany('companyId') companyId: string,
+    @CurrentUser('userId') requestingUserId: string,
+    @Param('id') id: string,
+  ) {
+    return this.companyMembersService.remove(companyId, id, requestingUserId);
   }
 }

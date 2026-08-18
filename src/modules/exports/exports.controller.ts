@@ -95,6 +95,24 @@ export class ExportsController {
     sendXlsx(res, 'outstanding-report.xlsx', buffer);
   }
 
+  @Get('creditors.xlsx')
+  async creditors(
+    @CurrentCompany('companyId') companyId: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    const buffer = await this.exportsService.creditorsReportExcel(companyId);
+    sendXlsx(res, 'creditors-report.xlsx', buffer);
+  }
+
+  @Get('debtors.xlsx')
+  async debtors(
+    @CurrentCompany('companyId') companyId: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    const buffer = await this.exportsService.debtorsReportExcel(companyId);
+    sendXlsx(res, 'debtors-report.xlsx', buffer);
+  }
+
   @Get('payments.xlsx')
   async payments(
     @CurrentCompany('companyId') companyId: string,

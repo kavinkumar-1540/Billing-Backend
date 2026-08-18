@@ -1,5 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsMongoId, IsString, MinLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsBoolean,
+  IsEmail,
+  IsMongoId,
+  IsOptional,
+  IsString,
+  MinLength,
+} from 'class-validator';
 
 export class CreateCompanyUserDto {
   @ApiProperty()
@@ -18,4 +25,11 @@ export class CreateCompanyUserDto {
   @ApiProperty()
   @IsMongoId()
   roleId!: string;
+
+  @ApiPropertyOptional({
+    description: 'Initial membership status; defaults to active',
+  })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
 }

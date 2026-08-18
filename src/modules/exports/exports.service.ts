@@ -178,6 +178,16 @@ export class ExportsService {
     );
   }
 
+  async creditorsReportExcel(companyId: string): Promise<Buffer> {
+    const rows = await this.reportsService.creditorsReport(companyId);
+    return buildWorkbook('Creditors Report', PARTY_LEDGER_COLUMNS, rows);
+  }
+
+  async debtorsReportExcel(companyId: string): Promise<Buffer> {
+    const rows = await this.reportsService.debtorsReport(companyId);
+    return buildWorkbook('Debtors Report', PARTY_LEDGER_COLUMNS, rows);
+  }
+
   async paymentReportExcel(
     companyId: string,
     range: DateRange,

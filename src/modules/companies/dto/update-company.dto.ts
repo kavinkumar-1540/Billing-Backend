@@ -9,10 +9,13 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { AddressDto } from '../../../common/dto/address.dto';
+import { BankDetailsDto } from './bank-details.dto';
+import { InvoiceBrandingDto } from './invoice-branding.dto';
 
 export class UpdateCompanyDto {
   @ApiPropertyOptional() @IsOptional() @IsString() name?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() legalName?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() tradeName?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() logoUrl?: string;
 
   @ApiPropertyOptional({ type: AddressDto })
@@ -37,4 +40,16 @@ export class UpdateCompanyDto {
 
   @ApiPropertyOptional() @IsOptional() @IsString() currency?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() taxRegistrationType?: string;
+
+  @ApiPropertyOptional({ type: BankDetailsDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => BankDetailsDto)
+  bankDetails?: BankDetailsDto;
+
+  @ApiPropertyOptional({ type: InvoiceBrandingDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => InvoiceBrandingDto)
+  invoiceBranding?: InvoiceBrandingDto;
 }
