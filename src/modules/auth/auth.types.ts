@@ -18,5 +18,5 @@ export interface RequestCompanyContext {
   companyId: string;
   roleId: string;
   roleName: string;
-  permissions: string[];
+  roleKey: string;
 }

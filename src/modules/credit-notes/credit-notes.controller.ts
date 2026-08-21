@@ -12,19 +12,17 @@ import { CreditNotesService } from './credit-notes.service';
 import { CreateCreditNoteDto } from './dto/create-credit-note.dto';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
 import { CompanyScopeGuard } from '../auth/guards/company-scope.guard';
-import { PermissionsGuard } from '../auth/guards/permissions.guard';
-import { RequirePermissions } from '../auth/decorators/require-permissions.decorator';
+import { ApiPermissionGuard } from '../auth/guards/api-permission.guard';
 import { CurrentCompany } from '../auth/decorators/current-company.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('credit-notes')
 @ApiBearerAuth()
-@UseGuards(CompanyScopeGuard, PermissionsGuard)
+@UseGuards(CompanyScopeGuard, ApiPermissionGuard)
 @Controller('credit-notes')
 export class CreditNotesController {
   constructor(private readonly creditNotesService: CreditNotesService) {}
 
-  @RequirePermissions('sales:create')
   @Post()
   issue(
     @CurrentCompany('companyId') companyId: string,
@@ -34,7 +32,6 @@ export class CreditNotesController {
     return this.creditNotesService.issue(companyId, userId, dto);
   }
 
-  @RequirePermissions('sales:view')
   @Get()
   findAll(
     @CurrentCompany('companyId') companyId: string,
@@ -43,7 +40,6 @@ export class CreditNotesController {
     return this.creditNotesService.findAll(companyId, query);
   }
 
-  @RequirePermissions('sales:view')
   @Get(':id')
   findOne(
     @CurrentCompany('companyId') companyId: string,

@@ -12,19 +12,17 @@ import { DebitNotesService } from './debit-notes.service';
 import { CreateDebitNoteDto } from './dto/create-debit-note.dto';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
 import { CompanyScopeGuard } from '../auth/guards/company-scope.guard';
-import { PermissionsGuard } from '../auth/guards/permissions.guard';
-import { RequirePermissions } from '../auth/decorators/require-permissions.decorator';
+import { ApiPermissionGuard } from '../auth/guards/api-permission.guard';
 import { CurrentCompany } from '../auth/decorators/current-company.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('debit-notes')
 @ApiBearerAuth()
-@UseGuards(CompanyScopeGuard, PermissionsGuard)
+@UseGuards(CompanyScopeGuard, ApiPermissionGuard)
 @Controller('debit-notes')
 export class DebitNotesController {
   constructor(private readonly debitNotesService: DebitNotesService) {}
 
-  @RequirePermissions('purchase:create')
   @Post()
   issue(
     @CurrentCompany('companyId') companyId: string,
@@ -34,7 +32,6 @@ export class DebitNotesController {
     return this.debitNotesService.issue(companyId, userId, dto);
   }
 
-  @RequirePermissions('purchase:view')
   @Get()
   findAll(
     @CurrentCompany('companyId') companyId: string,
@@ -43,7 +40,6 @@ export class DebitNotesController {
     return this.debitNotesService.findAll(companyId, query);
   }
 
-  @RequirePermissions('purchase:view')
   @Get(':id')
   findOne(
     @CurrentCompany('companyId') companyId: string,

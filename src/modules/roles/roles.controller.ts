@@ -12,54 +12,35 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
-import { PERMISSIONS } from '../permissions/permissions.constants';
 import { CompanyScopeGuard } from '../auth/guards/company-scope.guard';
-import { PermissionsGuard } from '../auth/guards/permissions.guard';
-import { RequirePermissions } from '../auth/decorators/require-permissions.decorator';
-import { CurrentCompany } from '../auth/decorators/current-company.decorator';
+import { ApiPermissionGuard } from '../auth/guards/api-permission.guard';
+import { SkipPermissionCheck } from '../auth/decorators/skip-permission-check.decorator';
 
 @ApiTags('roles')
 @ApiBearerAuth()
-@UseGuards(CompanyScopeGuard, PermissionsGuard)
+@UseGuards(CompanyScopeGuard, ApiPermissionGuard)
 @Controller('roles')
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
-  @Get('permissions/catalog')
-  permissionCatalog() {
-    return PERMISSIONS;
-  }
-
+  @SkipPermissionCheck()
   @Get()
-  findAll(@CurrentCompany('companyId') companyId: string) {
-    return this.rolesService.findAllForCompany(companyId);
+  findAll() {
+    return this.rolesService.findAll();
   }
 
-  @RequirePermissions('users:manage')
   @Post()
-  create(
-    @CurrentCompany('companyId') companyId: string,
-    @Body() dto: CreateRoleDto,
-  ) {
-    return this.rolesService.create(companyId, dto);
+  create(@Body() dto: CreateRoleDto) {
+    return this.rolesService.create(dto);
   }
 
-  @RequirePermissions('users:manage')
   @Patch(':id')
-  update(
-    @CurrentCompany('companyId') companyId: string,
-    @Param('id') id: string,
-    @Body() dto: UpdateRoleDto,
-  ) {
-    return this.rolesService.update(companyId, id, dto);
+  update(@Param('id') id: string, @Body() dto: UpdateRoleDto) {
+    return this.rolesService.update(id, dto);
   }
 
-  @RequirePermissions('users:manage')
   @Delete(':id')
-  remove(
-    @CurrentCompany('companyId') companyId: string,
-    @Param('id') id: string,
-  ) {
-    return this.rolesService.remove(companyId, id);
+  remove(@Param('id') id: string) {
+    return this.rolesService.remove(id);
   }
 }

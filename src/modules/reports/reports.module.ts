@@ -32,6 +32,7 @@ import {
   CompanyMemberSchema,
 } from '../company-members/schemas/company-member.schema';
 import { Role, RoleSchema } from '../roles/schemas/role.schema';
+import { AuthModule } from '../auth/auth.module';
 import { ReportsController } from './reports.controller';
 import { ReportsService } from './reports.service';
 
@@ -50,6 +51,7 @@ import { ReportsService } from './reports.service';
       { name: CompanyMember.name, schema: CompanyMemberSchema },
       { name: Role.name, schema: RoleSchema },
     ]),
+    AuthModule,
   ],
   controllers: [ReportsController],
   providers: [ReportsService],

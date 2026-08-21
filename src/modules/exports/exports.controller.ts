@@ -4,8 +4,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ExportsService } from './exports.service';
 import { DateRangeQueryDto } from '../reports/dto/date-range-query.dto';
 import { CompanyScopeGuard } from '../auth/guards/company-scope.guard';
-import { PermissionsGuard } from '../auth/guards/permissions.guard';
-import { RequirePermissions } from '../auth/decorators/require-permissions.decorator';
+import { ApiPermissionGuard } from '../auth/guards/api-permission.guard';
 import { CurrentCompany } from '../auth/decorators/current-company.decorator';
 import { DateRange } from '../reports/reports.types';
 
@@ -28,8 +27,7 @@ function sendXlsx(res: Response, filename: string, buffer: Buffer): void {
 
 @ApiTags('exports')
 @ApiBearerAuth()
-@UseGuards(CompanyScopeGuard, PermissionsGuard)
-@RequirePermissions('reports:export')
+@UseGuards(CompanyScopeGuard, ApiPermissionGuard)
 @Controller('exports')
 export class ExportsController {
   constructor(private readonly exportsService: ExportsService) {}

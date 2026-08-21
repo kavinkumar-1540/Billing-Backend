@@ -34,6 +34,7 @@ import {
   CompanyMemberSchema,
 } from '../company-members/schemas/company-member.schema';
 import { Role, RoleSchema } from '../roles/schemas/role.schema';
+import { PermissionsModule } from '../permissions/permissions.module';
 import { DocumentsController } from './documents.controller';
 import { DocumentsService } from './documents.service';
 import { PdfRenderService } from './pdf-render.service';
@@ -52,6 +53,7 @@ import { PdfRenderService } from './pdf-render.service';
       { name: CompanyMember.name, schema: CompanyMemberSchema },
       { name: Role.name, schema: RoleSchema },
     ]),
+    PermissionsModule,
   ],
   controllers: [DocumentsController],
   providers: [DocumentsService, PdfRenderService],

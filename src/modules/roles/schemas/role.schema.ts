@@ -1,23 +1,26 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types, SchemaTypes } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
 
 export type RoleDocument = HydratedDocument<Role>;
 
+/** Roles are global, shared across every company (not per-company). */
 @Schema({ timestamps: true, collection: 'roles' })
 export class Role {
-  /** null for system-default roles shared across all companies */
-  @Prop({ type: SchemaTypes.ObjectId, ref: 'Company', default: null })
-  companyId!: Types.ObjectId | null;
-
   @Prop({ required: true })
   name!: string;
 
-  @Prop({ type: [String], default: [] })
-  permissions!: string[];
+  /** Stable slug identifying this role; immutable after creation. */
+  @Prop({ required: true, unique: true })
+  roleKey!: string;
+
+  @Prop({ default: '' })
+  description!: string;
+
+  @Prop({ default: true })
+  active!: boolean;
 
   @Prop({ default: false })
   isSystemDefault!: boolean;
 }
 
 export const RoleSchema = SchemaFactory.createForClass(Role);
-RoleSchema.index({ companyId: 1, name: 1 }, { unique: true });

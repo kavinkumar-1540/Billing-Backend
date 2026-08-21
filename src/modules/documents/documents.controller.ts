@@ -14,9 +14,10 @@ import { DocumentsService } from './documents.service';
 import { PdfDocumentType } from './documents.types';
 import { CompanyScopeGuard } from '../auth/guards/company-scope.guard';
 import { CurrentCompany } from '../auth/decorators/current-company.decorator';
-import { PermissionKey } from '../permissions/permissions.constants';
+import { SkipPermissionCheck } from '../auth/decorators/skip-permission-check.decorator';
+import { PermissionsService } from '../permissions/permissions.service';
 
-const DOC_TYPE_PERMISSIONS: Record<PdfDocumentType, PermissionKey> = {
+const DOC_TYPE_PERMISSIONS: Record<PdfDocumentType, string> = {
   'sales-order': 'sales:view',
   'sales-invoice': 'sales:view',
   'purchase-order': 'purchase:view',
@@ -46,16 +47,22 @@ function assertValidDocType(
 @UseGuards(CompanyScopeGuard)
 @Controller('documents')
 export class DocumentsController {
-  constructor(private readonly documentsService: DocumentsService) {}
+  constructor(
+    private readonly documentsService: DocumentsService,
+    private readonly permissionsService: PermissionsService,
+  ) {}
 
+  @SkipPermissionCheck()
   @Get(':docType/:id/preview')
   @Header('Content-Type', 'text/html')
   async preview(
     @CurrentCompany('companyId') companyId: string,
-    @CurrentCompany('permissions') permissions: string[],
+    @CurrentCompany('roleKey') roleKey: string,
     @Param('docType') docType: string,
     @Param('id') id: string,
   ): Promise<string> {
+    const permissions =
+      await this.permissionsService.getResolvedPermissionKeys(roleKey);
     return this.documentsService.renderHtml(
       companyId,
       assertValidDocType(docType, permissions),
@@ -63,14 +70,17 @@ export class DocumentsController {
     );
   }
 
+  @SkipPermissionCheck()
   @Get(':docType/:id/pdf')
   async pdf(
     @CurrentCompany('companyId') companyId: string,
-    @CurrentCompany('permissions') permissions: string[],
+    @CurrentCompany('roleKey') roleKey: string,
     @Param('docType') docType: string,
     @Param('id') id: string,
     @Res() res: Response,
   ): Promise<void> {
+    const permissions =
+      await this.permissionsService.getResolvedPermissionKeys(roleKey);
     const type = assertValidDocType(docType, permissions);
     const buffer = await this.documentsService.renderPdf(companyId, type, id);
     res.set({

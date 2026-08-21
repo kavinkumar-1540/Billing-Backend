@@ -1,14 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import {
-  ArrayUnique,
-  IsArray,
-  IsIn,
-  IsString,
-  MinLength,
-} from 'class-validator';
-import { PERMISSIONS } from '../../permissions/permissions.constants';
-
-const VALID_PERMISSION_KEYS = PERMISSIONS.map((p) => p.key);
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsOptional, IsString, Matches, MinLength } from 'class-validator';
 
 export class CreateRoleDto {
   @ApiProperty()
@@ -16,9 +7,13 @@ export class CreateRoleDto {
   @MinLength(2)
   name!: string;
 
-  @ApiProperty({ enum: VALID_PERMISSION_KEYS, isArray: true })
-  @IsArray()
-  @ArrayUnique()
-  @IsIn(VALID_PERMISSION_KEYS, { each: true })
-  permissions!: string[];
+  @ApiProperty()
+  @IsString()
+  @Matches(/^[a-z0-9_]+$/)
+  roleKey!: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  description?: string;
 }

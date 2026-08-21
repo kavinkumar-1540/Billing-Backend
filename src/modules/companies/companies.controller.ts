@@ -3,23 +3,23 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CompaniesService } from './companies.service';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { CompanyScopeGuard } from '../auth/guards/company-scope.guard';
-import { PermissionsGuard } from '../auth/guards/permissions.guard';
-import { RequirePermissions } from '../auth/decorators/require-permissions.decorator';
+import { ApiPermissionGuard } from '../auth/guards/api-permission.guard';
+import { SkipPermissionCheck } from '../auth/decorators/skip-permission-check.decorator';
 import { CurrentCompany } from '../auth/decorators/current-company.decorator';
 
 @ApiTags('companies')
 @ApiBearerAuth()
-@UseGuards(CompanyScopeGuard, PermissionsGuard)
+@UseGuards(CompanyScopeGuard, ApiPermissionGuard)
 @Controller('companies')
 export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) {}
 
+  @SkipPermissionCheck()
   @Get('current')
   findCurrent(@CurrentCompany('companyId') companyId: string) {
     return this.companiesService.findOne(companyId);
   }
 
-  @RequirePermissions('settings:manage')
   @Patch('current')
   updateCurrent(
     @CurrentCompany('companyId') companyId: string,

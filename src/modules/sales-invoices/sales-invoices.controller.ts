@@ -15,19 +15,17 @@ import { CancelInvoiceDto } from './dto/cancel-invoice.dto';
 import { ConvertOrderDto } from './dto/convert-order.dto';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
 import { CompanyScopeGuard } from '../auth/guards/company-scope.guard';
-import { PermissionsGuard } from '../auth/guards/permissions.guard';
-import { RequirePermissions } from '../auth/decorators/require-permissions.decorator';
+import { ApiPermissionGuard } from '../auth/guards/api-permission.guard';
 import { CurrentCompany } from '../auth/decorators/current-company.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('sales-invoices')
 @ApiBearerAuth()
-@UseGuards(CompanyScopeGuard, PermissionsGuard)
+@UseGuards(CompanyScopeGuard, ApiPermissionGuard)
 @Controller('sales-invoices')
 export class SalesInvoicesController {
   constructor(private readonly salesInvoicesService: SalesInvoicesService) {}
 
-  @RequirePermissions('sales:create')
   @Post()
   issue(
     @CurrentCompany('companyId') companyId: string,
@@ -37,7 +35,6 @@ export class SalesInvoicesController {
     return this.salesInvoicesService.issue(companyId, userId, dto);
   }
 
-  @RequirePermissions('sales:create')
   @Post('from-order/:salesOrderId')
   convertFromOrder(
     @CurrentCompany('companyId') companyId: string,
@@ -53,7 +50,6 @@ export class SalesInvoicesController {
     );
   }
 
-  @RequirePermissions('sales:view')
   @Get()
   findAll(
     @CurrentCompany('companyId') companyId: string,
@@ -62,7 +58,6 @@ export class SalesInvoicesController {
     return this.salesInvoicesService.findAll(companyId, query);
   }
 
-  @RequirePermissions('sales:view')
   @Get(':id')
   findOne(
     @CurrentCompany('companyId') companyId: string,
@@ -71,7 +66,6 @@ export class SalesInvoicesController {
     return this.salesInvoicesService.findOne(companyId, id);
   }
 
-  @RequirePermissions('sales:cancel')
   @Patch(':id/cancel')
   cancel(
     @CurrentCompany('companyId') companyId: string,

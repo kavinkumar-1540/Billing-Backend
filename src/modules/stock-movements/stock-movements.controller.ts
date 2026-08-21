@@ -3,16 +3,15 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { StockMovementsService } from './stock-movements.service';
 import { CreateStockAdjustmentDto } from './dto/create-stock-adjustment.dto';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
+import { ListMovementsQueryDto } from './dto/list-movements-query.dto';
 import { CompanyScopeGuard } from '../auth/guards/company-scope.guard';
-import { PermissionsGuard } from '../auth/guards/permissions.guard';
-import { RequirePermissions } from '../auth/decorators/require-permissions.decorator';
+import { ApiPermissionGuard } from '../auth/guards/api-permission.guard';
 import { CurrentCompany } from '../auth/decorators/current-company.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('inventory')
 @ApiBearerAuth()
-@UseGuards(CompanyScopeGuard, PermissionsGuard)
-@RequirePermissions('inventory:view')
+@UseGuards(CompanyScopeGuard, ApiPermissionGuard)
 @Controller()
 export class StockMovementsController {
   constructor(private readonly stockMovementsService: StockMovementsService) {}
@@ -28,13 +27,15 @@ export class StockMovementsController {
   @Get('inventory/movements')
   findMovements(
     @CurrentCompany('companyId') companyId: string,
-    @Query('itemId') itemId: string | undefined,
-    @Query() query: PaginationQueryDto,
+    @Query() query: ListMovementsQueryDto,
   ) {
-    return this.stockMovementsService.findMovements(companyId, itemId, query);
+    return this.stockMovementsService.findMovements(
+      companyId,
+      query.itemId,
+      query,
+    );
   }
 
-  @RequirePermissions('inventory:adjust')
   @Post('inventory/adjustments')
   createAdjustment(
     @CurrentCompany('companyId') companyId: string,

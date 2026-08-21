@@ -7,6 +7,7 @@ import {
   CompanyMemberSchema,
 } from '../company-members/schemas/company-member.schema';
 import { Role, RoleSchema } from '../roles/schemas/role.schema';
+import { AuthModule } from '../auth/auth.module';
 import { AuditService } from './audit.service';
 import { AuditController } from './audit.controller';
 
@@ -18,6 +19,7 @@ import { AuditController } from './audit.controller';
       { name: CompanyMember.name, schema: CompanyMemberSchema },
       { name: Role.name, schema: RoleSchema },
     ]),
+    AuthModule,
   ],
   controllers: [AuditController],
   providers: [AuditService],

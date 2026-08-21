@@ -22,9 +22,9 @@ export interface RequestWithCompany extends Request {
 /**
  * Enforces multi-tenant isolation: every protected business-data route must
  * carry an `x-company-id` header naming a company the authenticated user is
- * an active member of. Resolves the member's role/permissions onto the
- * request so PermissionsGuard and services can rely on them without
- * re-querying company_members themselves.
+ * an active member of. Resolves the member's role onto the request so
+ * ApiPermissionGuard and services can rely on it without re-querying
+ * company_members themselves.
  */
 @Injectable()
 export class CompanyScopeGuard implements CanActivate {
@@ -67,7 +67,7 @@ export class CompanyScopeGuard implements CanActivate {
       companyId,
       roleId: String(role._id),
       roleName: role.name,
-      permissions: role.permissions,
+      roleKey: role.roleKey,
     };
 
     return true;

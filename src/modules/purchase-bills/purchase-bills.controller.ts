@@ -15,19 +15,17 @@ import { CancelPurchaseBillDto } from './dto/cancel-purchase-bill.dto';
 import { ConvertPurchaseOrderDto } from './dto/convert-purchase-order.dto';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
 import { CompanyScopeGuard } from '../auth/guards/company-scope.guard';
-import { PermissionsGuard } from '../auth/guards/permissions.guard';
-import { RequirePermissions } from '../auth/decorators/require-permissions.decorator';
+import { ApiPermissionGuard } from '../auth/guards/api-permission.guard';
 import { CurrentCompany } from '../auth/decorators/current-company.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('purchase-bills')
 @ApiBearerAuth()
-@UseGuards(CompanyScopeGuard, PermissionsGuard)
+@UseGuards(CompanyScopeGuard, ApiPermissionGuard)
 @Controller('purchase-bills')
 export class PurchaseBillsController {
   constructor(private readonly purchaseBillsService: PurchaseBillsService) {}
 
-  @RequirePermissions('purchase:create')
   @Post()
   confirm(
     @CurrentCompany('companyId') companyId: string,
@@ -37,7 +35,6 @@ export class PurchaseBillsController {
     return this.purchaseBillsService.confirm(companyId, userId, dto);
   }
 
-  @RequirePermissions('purchase:create')
   @Post('from-order/:purchaseOrderId')
   convertFromOrder(
     @CurrentCompany('companyId') companyId: string,
@@ -53,7 +50,6 @@ export class PurchaseBillsController {
     );
   }
 
-  @RequirePermissions('purchase:view')
   @Get()
   findAll(
     @CurrentCompany('companyId') companyId: string,
@@ -62,7 +58,6 @@ export class PurchaseBillsController {
     return this.purchaseBillsService.findAll(companyId, query);
   }
 
-  @RequirePermissions('purchase:view')
   @Get(':id')
   findOne(
     @CurrentCompany('companyId') companyId: string,
@@ -71,7 +66,6 @@ export class PurchaseBillsController {
     return this.purchaseBillsService.findOne(companyId, id);
   }
 
-  @RequirePermissions('purchase:cancel')
   @Patch(':id/cancel')
   cancel(
     @CurrentCompany('companyId') companyId: string,

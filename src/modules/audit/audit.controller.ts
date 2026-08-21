@@ -3,14 +3,12 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuditService } from './audit.service';
 import { AuditLogQueryDto } from './dto/audit-log-query.dto';
 import { CompanyScopeGuard } from '../auth/guards/company-scope.guard';
-import { PermissionsGuard } from '../auth/guards/permissions.guard';
-import { RequirePermissions } from '../auth/decorators/require-permissions.decorator';
+import { ApiPermissionGuard } from '../auth/guards/api-permission.guard';
 import { CurrentCompany } from '../auth/decorators/current-company.decorator';
 
 @ApiTags('audit')
 @ApiBearerAuth()
-@UseGuards(CompanyScopeGuard, PermissionsGuard)
-@RequirePermissions('reports:view')
+@UseGuards(CompanyScopeGuard, ApiPermissionGuard)
 @Controller('audit-logs')
 export class AuditController {
   constructor(private readonly auditService: AuditService) {}

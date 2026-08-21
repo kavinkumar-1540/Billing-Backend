@@ -53,24 +53,16 @@ export class CompanyMembersService {
       });
   }
 
-  private async assertRoleUsableByCompany(
-    companyId: string,
-    roleId: string,
-  ): Promise<void> {
+  private async assertRoleExists(roleId: string): Promise<void> {
     const role = await this.roleModel.findById(roleId).exec();
     if (!role) throw new NotFoundException('Role not found');
-    const belongsToCompany =
-      role.companyId === null || String(role.companyId) === companyId;
-    if (!belongsToCompany) {
-      throw new BadRequestException('Role does not belong to this company');
-    }
   }
 
   async create(
     companyId: string,
     dto: CreateCompanyUserDto,
   ): Promise<CompanyUserListItem> {
-    await this.assertRoleUsableByCompany(companyId, dto.roleId);
+    await this.assertRoleExists(dto.roleId);
 
     let user = await this.userModel
       .findOne({ email: dto.email.toLowerCase() })
@@ -132,7 +124,7 @@ export class CompanyMembersService {
     companyMemberId: string,
     roleId: string,
   ): Promise<void> {
-    await this.assertRoleUsableByCompany(companyId, roleId);
+    await this.assertRoleExists(roleId);
     const member = await this.loadMemberScoped(companyId, companyMemberId);
     member.roleId = new Types.ObjectId(roleId);
     await member.save();

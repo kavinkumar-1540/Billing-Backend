@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -13,13 +13,15 @@ import { AuthController } from './auth.controller';
 import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { CompanyScopeGuard } from './guards/company-scope.guard';
-import { PermissionsGuard } from './guards/permissions.guard';
+import { ApiPermissionGuard } from './guards/api-permission.guard';
+import { PermissionsModule } from '../permissions/permissions.module';
 
 @Module({
   imports: [
     PassportModule,
     JwtModule.register({}),
     UsersModule,
+    forwardRef(() => PermissionsModule),
     MongooseModule.forFeature([
       { name: CompanyMember.name, schema: CompanyMemberSchema },
       { name: Role.name, schema: RoleSchema },
@@ -31,8 +33,13 @@ import { PermissionsGuard } from './guards/permissions.guard';
     JwtAccessStrategy,
     JwtRefreshStrategy,
     CompanyScopeGuard,
-    PermissionsGuard,
+    ApiPermissionGuard,
   ],
-  exports: [CompanyScopeGuard, PermissionsGuard, MongooseModule],
+  exports: [
+    CompanyScopeGuard,
+    ApiPermissionGuard,
+    MongooseModule,
+    PermissionsModule,
+  ],
 })
 export class AuthModule {}

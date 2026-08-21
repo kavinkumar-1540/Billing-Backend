@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   ConflictException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -23,59 +22,40 @@ export class RolesService {
     private readonly companyMemberModel: Model<CompanyMemberDocument>,
   ) {}
 
-  findAllForCompany(companyId: string): Promise<RoleDocument[]> {
-    return this.roleModel
-      .find({
-        $or: [
-          { companyId: new Types.ObjectId(companyId) },
-          { companyId: null },
-        ],
-      })
-      .sort({ isSystemDefault: -1, name: 1 })
-      .exec();
+  findAll(): Promise<RoleDocument[]> {
+    return this.roleModel.find({ active: true }).sort({ name: 1 }).exec();
   }
 
-  async create(companyId: string, dto: CreateRoleDto): Promise<RoleDocument> {
+  async create(dto: CreateRoleDto): Promise<RoleDocument> {
     const existing = await this.roleModel
-      .findOne({ companyId: new Types.ObjectId(companyId), name: dto.name })
+      .findOne({ roleKey: dto.roleKey })
       .exec();
     if (existing)
-      throw new ConflictException('A role with this name already exists');
+      throw new ConflictException('A role with this key already exists');
 
     return this.roleModel.create({
-      companyId: new Types.ObjectId(companyId),
       name: dto.name,
-      permissions: dto.permissions,
+      roleKey: dto.roleKey,
+      description: dto.description ?? '',
       isSystemDefault: false,
     });
   }
 
-  private async loadEditableRole(
-    companyId: string,
-    roleId: string,
-  ): Promise<RoleDocument> {
+  async update(roleId: string, dto: UpdateRoleDto): Promise<RoleDocument> {
     const role = await this.roleModel.findById(roleId).exec();
     if (!role) throw new NotFoundException('Role not found');
-    if (role.isSystemDefault || String(role.companyId) !== companyId) {
-      throw new ForbiddenException('System default roles cannot be modified');
-    }
-    return role;
-  }
 
-  async update(
-    companyId: string,
-    roleId: string,
-    dto: UpdateRoleDto,
-  ): Promise<RoleDocument> {
-    const role = await this.loadEditableRole(companyId, roleId);
     if (dto.name !== undefined) role.name = dto.name;
-    if (dto.permissions !== undefined) role.permissions = dto.permissions;
+    if (dto.description !== undefined) role.description = dto.description;
+    if (dto.active !== undefined) role.active = dto.active;
     await role.save();
     return role;
   }
 
-  async remove(companyId: string, roleId: string): Promise<void> {
-    await this.loadEditableRole(companyId, roleId);
+  async remove(roleId: string): Promise<void> {
+    const role = await this.roleModel.findById(roleId).exec();
+    if (!role) throw new NotFoundException('Role not found');
+
     const inUse = await this.companyMemberModel
       .exists({ roleId: new Types.ObjectId(roleId) })
       .exec();
@@ -84,6 +64,8 @@ export class RolesService {
         'Cannot delete a role that is currently assigned to one or more users',
       );
     }
-    await this.roleModel.deleteOne({ _id: roleId }).exec();
+
+    role.active = false;
+    await role.save();
   }
 }

@@ -15,19 +15,18 @@ import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
 import { CompanyScopeGuard } from '../auth/guards/company-scope.guard';
-import { PermissionsGuard } from '../auth/guards/permissions.guard';
-import { RequirePermissions } from '../auth/decorators/require-permissions.decorator';
+import { ApiPermissionGuard } from '../auth/guards/api-permission.guard';
+import { SkipPermissionCheck } from '../auth/decorators/skip-permission-check.decorator';
 import { CurrentCompany } from '../auth/decorators/current-company.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('items')
 @ApiBearerAuth()
-@UseGuards(CompanyScopeGuard, PermissionsGuard)
+@UseGuards(CompanyScopeGuard, ApiPermissionGuard)
 @Controller('items')
 export class ItemsController {
   constructor(private readonly itemsService: ItemsService) {}
 
-  @RequirePermissions('items:manage')
   @Post()
   create(
     @CurrentCompany('companyId') companyId: string,
@@ -37,6 +36,7 @@ export class ItemsController {
     return this.itemsService.create(companyId, userId, dto);
   }
 
+  @SkipPermissionCheck()
   @Get()
   findAll(
     @CurrentCompany('companyId') companyId: string,
@@ -45,6 +45,7 @@ export class ItemsController {
     return this.itemsService.findAll(companyId, query);
   }
 
+  @SkipPermissionCheck()
   @Get(':id')
   findOne(
     @CurrentCompany('companyId') companyId: string,
@@ -53,7 +54,6 @@ export class ItemsController {
     return this.itemsService.findOne(companyId, id);
   }
 
-  @RequirePermissions('items:manage')
   @Patch(':id')
   update(
     @CurrentCompany('companyId') companyId: string,
@@ -63,7 +63,6 @@ export class ItemsController {
     return this.itemsService.update(companyId, id, dto);
   }
 
-  @RequirePermissions('items:manage')
   @Delete(':id')
   deactivate(
     @CurrentCompany('companyId') companyId: string,

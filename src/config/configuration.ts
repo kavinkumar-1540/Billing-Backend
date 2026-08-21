@@ -13,10 +13,17 @@ export interface AppConfig {
   jwtRefreshExpiresInSeconds: number;
   frontendUrl: string;
   nodeEnv: string;
+  /** Path to a system-installed Chromium binary; falls back to puppeteer's bundled browser if unset/missing. */
+  chromiumPath?: string;
 }
 
 interface RawConfigFile {
-  app?: { port?: number; nodeEnv?: string; frontendUrl?: string };
+  app?: {
+    port?: number;
+    nodeEnv?: string;
+    frontendUrl?: string;
+    chromiumPath?: string;
+  };
   mongodb?: { uri?: string };
   jwt?: {
     accessSecret?: string;
@@ -74,6 +81,7 @@ export default (): { app: AppConfig } => {
         merged.jwt?.refreshSecret ?? 'dev-refresh-secret-change-me',
       jwtAccessExpiresInSeconds: merged.jwt?.accessExpiresInSeconds ?? 900,
       jwtRefreshExpiresInSeconds: merged.jwt?.refreshExpiresInSeconds ?? 604800,
+      chromiumPath: merged.app?.chromiumPath ?? process.env.CHROMIUM_PATH,
     },
   };
 };

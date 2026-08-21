@@ -3,23 +3,35 @@ import {
   OnModuleDestroy,
   ServiceUnavailableException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import puppeteer, { Browser } from 'puppeteer';
+import { resolveChromiumExecutablePath } from '../../common/utils/puppeteer-launch.util';
 
 @Injectable()
 export class PdfRenderService implements OnModuleDestroy {
   private browserPromise?: Promise<Browser>;
+
+  constructor(private readonly configService: ConfigService) {}
 
   private getBrowser(): Promise<Browser> {
     if (!this.browserPromise) {
       this.browserPromise = puppeteer
         .launch({
           headless: true,
-          args: ['--no-sandbox', '--disable-setuid-sandbox'],
+          executablePath: resolveChromiumExecutablePath(
+            this.configService.get<string>('app.chromiumPath'),
+          ),
+          args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+          ],
         })
         .catch((err: unknown) => {
           this.browserPromise = undefined;
+          const detail = err instanceof Error ? err.message : String(err);
           throw new ServiceUnavailableException(
-            'PDF generation is unavailable on this deployment (no Chromium runtime installed)',
+            `PDF generation is unavailable: failed to launch Chromium (${detail})`,
             { cause: err instanceof Error ? err : undefined },
           );
         });

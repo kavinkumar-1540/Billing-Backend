@@ -101,14 +101,14 @@ export class AuthService {
         };
         const role = m.roleId as unknown as {
           name: string;
-          permissions: string[];
+          roleKey: string;
         };
         return {
           companyId: String(company._id),
           companyName: company.name,
           companySlug: company.slug,
           roleName: role.name,
-          permissions: role.permissions,
+          roleKey: role.roleKey,
         };
       });
   }

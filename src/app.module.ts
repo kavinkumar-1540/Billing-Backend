@@ -11,6 +11,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { JwtAccessGuard } from './modules/auth/guards/jwt-access.guard';
 import { UsersModule } from './modules/users/users.module';
 import { RolesModule } from './modules/roles/roles.module';
+import { PermissionsModule } from './modules/permissions/permissions.module';
 import { CompaniesModule } from './modules/companies/companies.module';
 import { CompanyMembersModule } from './modules/company-members/company-members.module';
 import { PartiesModule } from './modules/parties/parties.module';
@@ -50,6 +51,7 @@ import { ExportsModule } from './modules/exports/exports.module';
     AuthModule,
     UsersModule,
     RolesModule,
+    PermissionsModule,
     CompaniesModule,
     CompanyMembersModule,
     PartiesModule,

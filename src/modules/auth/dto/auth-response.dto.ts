@@ -5,7 +5,7 @@ export class CompanyMembershipDto {
   @ApiProperty() companyName!: string;
   @ApiProperty() companySlug!: string;
   @ApiProperty() roleName!: string;
-  @ApiProperty({ type: [String] }) permissions!: string[];
+  @ApiProperty() roleKey!: string;
 }
 
 export class AuthResponseDto {

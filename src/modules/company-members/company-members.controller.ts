@@ -15,24 +15,24 @@ import { UpdateCompanyUserRoleDto } from './dto/update-company-user-role.dto';
 import { UpdateCompanyUserStatusDto } from './dto/update-company-user-status.dto';
 import { UpdateCompanyUserProfileDto } from './dto/update-company-user-profile.dto';
 import { CompanyScopeGuard } from '../auth/guards/company-scope.guard';
-import { PermissionsGuard } from '../auth/guards/permissions.guard';
-import { RequirePermissions } from '../auth/decorators/require-permissions.decorator';
+import { ApiPermissionGuard } from '../auth/guards/api-permission.guard';
+import { SkipPermissionCheck } from '../auth/decorators/skip-permission-check.decorator';
 import { CurrentCompany } from '../auth/decorators/current-company.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('company-members')
 @ApiBearerAuth()
-@UseGuards(CompanyScopeGuard, PermissionsGuard)
+@UseGuards(CompanyScopeGuard, ApiPermissionGuard)
 @Controller('company-members')
 export class CompanyMembersController {
   constructor(private readonly companyMembersService: CompanyMembersService) {}
 
+  @SkipPermissionCheck()
   @Get()
   findAll(@CurrentCompany('companyId') companyId: string) {
     return this.companyMembersService.findAllForCompany(companyId);
   }
 
-  @RequirePermissions('users:manage')
   @Post()
   create(
     @CurrentCompany('companyId') companyId: string,
@@ -41,7 +41,6 @@ export class CompanyMembersController {
     return this.companyMembersService.create(companyId, dto);
   }
 
-  @RequirePermissions('users:manage')
   @Patch(':id/role')
   updateRole(
     @CurrentCompany('companyId') companyId: string,
@@ -51,7 +50,6 @@ export class CompanyMembersController {
     return this.companyMembersService.updateRole(companyId, id, dto.roleId);
   }
 
-  @RequirePermissions('users:manage')
   @Patch(':id/status')
   setStatus(
     @CurrentCompany('companyId') companyId: string,
@@ -67,7 +65,6 @@ export class CompanyMembersController {
     );
   }
 
-  @RequirePermissions('users:manage')
   @Patch(':id/profile')
   updateProfile(
     @CurrentCompany('companyId') companyId: string,
@@ -77,7 +74,6 @@ export class CompanyMembersController {
     return this.companyMembersService.updateProfile(companyId, id, dto);
   }
 
-  @RequirePermissions('users:manage')
   @Delete(':id')
   remove(
     @CurrentCompany('companyId') companyId: string,
