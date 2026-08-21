@@ -15,6 +15,8 @@ export interface AppConfig {
   nodeEnv: string;
   /** Path to a system-installed Chromium binary; falls back to puppeteer's bundled browser if unset/missing. */
   chromiumPath?: string;
+  /** wss:// endpoint of a hosted browser (e.g. Browserless.io); when set, PDF rendering connects here instead of launching a local Chromium. */
+  browserlessWsEndpoint?: string;
 }
 
 interface RawConfigFile {
@@ -82,6 +84,7 @@ export default (): { app: AppConfig } => {
       jwtAccessExpiresInSeconds: merged.jwt?.accessExpiresInSeconds ?? 900,
       jwtRefreshExpiresInSeconds: merged.jwt?.refreshExpiresInSeconds ?? 604800,
       chromiumPath: merged.app?.chromiumPath ?? process.env.CHROMIUM_PATH,
+      browserlessWsEndpoint: process.env.BROWSERLESS_WS_ENDPOINT,
     },
   };
 };

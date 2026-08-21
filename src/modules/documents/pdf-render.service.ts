@@ -10,31 +10,46 @@ import { resolveChromiumExecutablePath } from '../../common/utils/puppeteer-laun
 @Injectable()
 export class PdfRenderService implements OnModuleDestroy {
   private browserPromise?: Promise<Browser>;
+  private isRemoteBrowser = false;
 
   constructor(private readonly configService: ConfigService) {}
 
+  /**
+   * Renders happen either against a local/bundled Chromium (default, used in
+   * dev) or against a remote browser over WebSocket when
+   * app.browserlessWsEndpoint is configured - used in production
+   * deployments (e.g. Render) whose runtime container can't persist a
+   * puppeteer-downloaded Chromium binary between build and runtime.
+   */
   private getBrowser(): Promise<Browser> {
     if (!this.browserPromise) {
-      this.browserPromise = puppeteer
-        .launch({
-          headless: true,
-          executablePath: resolveChromiumExecutablePath(
-            this.configService.get<string>('app.chromiumPath'),
-          ),
-          args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-          ],
-        })
-        .catch((err: unknown) => {
-          this.browserPromise = undefined;
-          const detail = err instanceof Error ? err.message : String(err);
-          throw new ServiceUnavailableException(
-            `PDF generation is unavailable: failed to launch Chromium (${detail})`,
-            { cause: err instanceof Error ? err : undefined },
-          );
-        });
+      const browserlessEndpoint = this.configService.get<string>(
+        'app.browserlessWsEndpoint',
+      );
+      this.isRemoteBrowser = Boolean(browserlessEndpoint);
+
+      this.browserPromise = (
+        browserlessEndpoint
+          ? puppeteer.connect({ browserWSEndpoint: browserlessEndpoint })
+          : puppeteer.launch({
+              headless: true,
+              executablePath: resolveChromiumExecutablePath(
+                this.configService.get<string>('app.chromiumPath'),
+              ),
+              args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+              ],
+            })
+      ).catch((err: unknown) => {
+        this.browserPromise = undefined;
+        const detail = err instanceof Error ? err.message : String(err);
+        throw new ServiceUnavailableException(
+          `PDF generation is unavailable: failed to connect to Chromium (${detail})`,
+          { cause: err instanceof Error ? err : undefined },
+        );
+      });
     }
     return this.browserPromise;
   }
@@ -58,7 +73,11 @@ export class PdfRenderService implements OnModuleDestroy {
   async onModuleDestroy(): Promise<void> {
     if (this.browserPromise) {
       const browser = await this.browserPromise;
-      await browser.close();
+      if (this.isRemoteBrowser) {
+        await browser.disconnect();
+      } else {
+        await browser.close();
+      }
     }
   }
 }
