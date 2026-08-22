@@ -99,6 +99,21 @@ export const MODULE_SEED: ModuleSeedEntry[] = [
       { subModuleName: 'Manage Users', unique_key: 'users:manage' },
     ],
   },
+  {
+    moduleName: 'Company',
+    path: '/company',
+    icon: 'building',
+    order: 8,
+    subModules: [
+      { subModuleName: 'Add Company', unique_key: 'add_company' },
+      { subModuleName: 'Edit Company', unique_key: 'edit_company' },
+      { subModuleName: 'Delete Company', unique_key: 'delete_company' },
+      {
+        subModuleName: 'Manage Platform Users',
+        unique_key: 'manage_platform_users',
+      },
+    ],
+  },
 ];
 
 export const API_SEED: ApiSeedEntry[] = [
@@ -317,6 +332,49 @@ export const API_SEED: ApiSeedEntry[] = [
     method: 'DELETE',
     endpointPaths: ['/company-members/:id', '/roles/:id'],
   },
+  // add_company
+  {
+    unique_key: 'add_company',
+    method: 'POST',
+    endpointPaths: ['/companies'],
+  },
+  {
+    unique_key: 'add_company',
+    method: 'GET',
+    endpointPaths: ['/companies'],
+  },
+  // edit_company
+  {
+    unique_key: 'edit_company',
+    method: 'PATCH',
+    endpointPaths: ['/companies/:id'],
+  },
+  // delete_company (covers both deactivate and reactivate)
+  {
+    unique_key: 'delete_company',
+    method: 'PATCH',
+    endpointPaths: ['/companies/:id/deactivate', '/companies/:id/reactivate'],
+  },
+  // manage_platform_users
+  {
+    unique_key: 'manage_platform_users',
+    method: 'GET',
+    endpointPaths: ['/platform-users'],
+  },
+  {
+    unique_key: 'manage_platform_users',
+    method: 'POST',
+    endpointPaths: ['/platform-users'],
+  },
+  {
+    unique_key: 'manage_platform_users',
+    method: 'PATCH',
+    endpointPaths: [
+      '/platform-users/:id/role',
+      '/platform-users/:id/status',
+      '/platform-users/:id/profile',
+    ],
+  },
 ];
 
 /**
@@ -331,8 +389,10 @@ export const ROLE_SEED: {
   {
     roleKey: 'admin',
     name: 'ADMIN',
-    permissions: MODULE_SEED.flatMap((m) =>
-      m.subModules.map((s) => s.unique_key),
+    // Full access within its own company, but NOT cross-tenant actions
+    // (e.g. add_company) - those are reserved for super_admin.
+    permissions: MODULE_SEED.filter((m) => m.moduleName !== 'Company').flatMap(
+      (m) => m.subModules.map((s) => s.unique_key),
     ),
   },
   {
@@ -401,5 +461,12 @@ export const ROLE_SEED: {
       'inventory:view',
       'reports:view',
     ],
+  },
+  {
+    roleKey: 'super_admin',
+    name: 'SUPER ADMIN',
+    // Platform owner: every submodule across every module (superset of admin),
+    // including the Company module's cross-tenant keys admin is excluded from.
+    permissions: MODULE_SEED.flatMap((m) => m.subModules.map((s) => s.unique_key)),
   },
 ];

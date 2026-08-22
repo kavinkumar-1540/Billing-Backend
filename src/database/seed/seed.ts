@@ -195,6 +195,11 @@ async function run() {
       name: 'Sundar Raman',
       role: 'VIEWER',
     },
+    {
+      email: 'superadmin@businesssuite.local',
+      name: 'Platform Super Admin',
+      role: 'SUPER ADMIN',
+    },
   ] as const;
 
   const passwordHash = await bcrypt.hash('ChangeMe@123', 10);

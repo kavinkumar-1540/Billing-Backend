@@ -14,6 +14,7 @@ import { RolesModule } from './modules/roles/roles.module';
 import { PermissionsModule } from './modules/permissions/permissions.module';
 import { CompaniesModule } from './modules/companies/companies.module';
 import { CompanyMembersModule } from './modules/company-members/company-members.module';
+import { PlatformUsersModule } from './modules/platform-users/platform-users.module';
 import { PartiesModule } from './modules/parties/parties.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { TaxesModule } from './modules/taxes/taxes.module';
@@ -54,6 +55,7 @@ import { ExportsModule } from './modules/exports/exports.module';
     PermissionsModule,
     CompaniesModule,
     CompanyMembersModule,
+    PlatformUsersModule,
     PartiesModule,
     CategoriesModule,
     TaxesModule,
